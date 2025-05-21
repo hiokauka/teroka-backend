@@ -34,3 +34,30 @@ exports.getWeather = async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch weather data' });
   }
 };
+
+exports.getForecast = async (req, res) => {
+  const city = req.query.city;
+  if (!city) return res.status(400).json({ error: 'City is required' });
+
+  try {
+    const url = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}&units=metric`;
+    const response = await axios.get(url);
+
+    const forecastData = response.data.list;
+
+    // Group and filter data to get daily forecasts (every 24h)
+    const dailyForecasts = forecastData.filter(item => item.dt_txt.includes('12:00:00')).slice(0, 3);
+
+    const forecast = dailyForecasts.map(item => ({
+      date: item.dt_txt,
+      temp_max: item.main.temp_max,
+      description: item.weather[0].description,
+      icon: item.weather[0].icon
+    }));
+
+    res.json({ forecast });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch forecast data' });
+  }
+};
