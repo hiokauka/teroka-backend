@@ -9,7 +9,7 @@ const carbonHistorySchema = new mongoose.Schema({
   accommodation: { type: String }, // e.g. hotel name/type
   night: { type: Number, default: 0 },
   date: { type: Date, required: true },
-  userid: { type: String, required: true, ref: 'User' }
+  email: { type: String, required: true },
 }, { timestamps: true });
 
 module.exports = mongoose.model('CarbonHistory', carbonHistorySchema);

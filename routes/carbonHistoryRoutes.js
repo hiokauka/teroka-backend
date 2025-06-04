@@ -5,8 +5,10 @@ const { v4: uuidv4 } = require('uuid');
 
 // Create new carbon history entry
 router.post('/', async (req, res) => {
+   console.log('Received carbon entry:', req.body);
   try {
-    const { transportation, distance, origin, destination, accommodation, night, date, userid } = req.body;
+    const { transportation, distance, origin, destination, accommodation, night, date, email } = req.body;
+
     const carbonhistoryid = uuidv4();
 
     const carbonEntry = new CarbonHistory({
@@ -18,7 +20,7 @@ router.post('/', async (req, res) => {
       accommodation,
       night,
       date,
-      userid
+      email
     });
 
     const savedEntry = await carbonEntry.save();
@@ -28,17 +30,20 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Get all carbon history entries (optionally filter by userid)
+
+
+// Get all carbon history entries (optionally filter by email)
 router.get('/', async (req, res) => {
   try {
-    const { userid } = req.query;
-    const query = userid ? { userid } : {};
+    const { email } = req.query;
+    const query = email ? { email } : {};
     const entries = await CarbonHistory.find(query).sort({ date: -1 });
     res.json(entries);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
+
 
 // Get single carbon history by carbonhistoryid
 router.get('/:carbonhistoryid', async (req, res) => {

@@ -72,7 +72,7 @@ router.post("/login", async (req, res) => {
 // Get user data by email (for profile)
 router.get("/profile", async (req, res) => {
   const email = req.query.email;
-  console.log(req.query.email)
+  
   if (!email) {
     return res.status(400).json({ message: "Email query parameter is required" });
   }

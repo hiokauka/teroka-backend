@@ -3,57 +3,81 @@ const router = express.Router();
 const Itinerary = require('../models/itinerary');
 const { v4: uuidv4 } = require('uuid');
 
-// Create new itinerary
-router.post('/', async (req, res) => {
+
+//=================
+//add place 
+//=================
+router.post('/add-place', async (req, res) => {
+  const { userEmail, startDate, endDate, dayNumber, place } = req.body;
+
   try {
-    const { startDate, endDate, userid } = req.body;
-    const itineraryid = uuidv4();
+    // 1. Find user's itinerary
+    let itinerary = await Itinerary.findOne({ userEmail });
 
-    const newItinerary = new Itinerary({
-      itineraryid,
-      startDate,
-      endDate,
-      userid
-    });
+    if (!itinerary) {
+      // 2. Create a new itinerary if none exists
+      itinerary = new Itinerary({
+        userEmail,
+        startDate,
+        endDate,
+        days: [
+          {
+            day: dayNumber,
+            places: [place]
+          }
+        ]
+      });
+    } else {
+      // 3. Find the day in the itinerary
+      let day = itinerary.days.find(d => d.day === dayNumber);
+      if (!day) {
+        // Add new day if it doesn't exist
+        itinerary.days.push({ day: dayNumber, places: [place] });
+      } else {
+        // 4. Check if the place already exists for the day
+        const placeExists = day.places.some(p => p.name === place.name);
 
-    const savedItinerary = await newItinerary.save();
-    res.status(201).json(savedItinerary);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
+        if (placeExists) {
+          return res.status(400).json({ message: 'Place already added for this day' });
+        }
+
+        // 5. If not duplicate, add the place
+        day.places.push(place);
+      }
+    }
+
+    // 6. Save itinerary
+    const saved = await itinerary.save();
+    res.status(200).json(saved);
+
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 });
 
-// Get all itineraries (optionally filter by userid)
+
+// Get itinerary by userEmail
 router.get('/', async (req, res) => {
   try {
-    const { userid } = req.query;
-    const query = userid ? { userid } : {};
-    const itineraries = await Itinerary.find(query).sort({ createdAt: -1 });
-    res.json(itineraries);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
+    const { userEmail } = req.query;
+    if (!userEmail) return res.status(400).json({ message: "Missing userEmail query parameter" });
 
-// Get single itinerary by itineraryid
-router.get('/:itineraryid', async (req, res) => {
-  try {
-    const itinerary = await Itinerary.findOne({ itineraryid: req.params.itineraryid });
-    if (!itinerary) return res.status(404).json({ message: 'Itinerary not found' });
+    const itinerary = await Itinerary.findOne({ userEmail });
+    if (!itinerary) return res.status(404).json({ message: "Itinerary not found" });
+
     res.json(itinerary);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 });
 
-// Delete itinerary by itineraryid
-router.delete('/:itineraryid', async (req, res) => {
+// Get all itineraries
+router.get('/all', async (req, res) => {
   try {
-    const deleted = await Itinerary.findOneAndDelete({ itineraryid: req.params.itineraryid });
-    if (!deleted) return res.status(404).json({ message: 'Itinerary not found' });
-    res.json({ message: 'Itinerary deleted' });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    const itineraries = await Itinerary.find();
+    res.json(itineraries);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 });
 

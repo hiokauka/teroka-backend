@@ -1,11 +1,23 @@
 const mongoose = require('mongoose');
+const { v4: uuidv4 } = require('uuid');
 
-const itinerarySchema = new mongoose.Schema({
-  itineraryid: { type: String, required: true, unique: true },
-  startDate: { type: Date, required: true },
-  endDate: { type: Date, required: true },
-  createdAt: { type: Date, default: Date.now },
-  userid: { type: String, required: true, ref: 'User' }
+const PlaceSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  tags: [String],
 });
 
-module.exports = mongoose.model('Itinerary', itinerarySchema);
+const DaySchema = new mongoose.Schema({
+  day: { type: Number, required: true },
+  date: { type: Date },
+  places: [PlaceSchema]
+});
+
+const ItinerarySchema = new mongoose.Schema({
+  userEmail: { type: String, required: true, unique: true }, // unique to each user
+  startDate: { type: Date, required: true },
+  endDate: { type: Date, required: true },
+  days: [DaySchema],
+  createdAt: { type: Date, default: Date.now }
+});
+
+module.exports = mongoose.model('Itinerary', ItinerarySchema);
