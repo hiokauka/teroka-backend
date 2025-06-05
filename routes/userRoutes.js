@@ -2,9 +2,14 @@ const express = require("express");
 const router = express.Router();
 const { v4: uuidv4 } = require("uuid");
 const bcrypt = require("bcrypt");
+const User = require('../models/User');
+const Favorite = require('../models/favourite');
+const Itinerary = require('../models/itinerary');
+const carbonHistory = require("../models/carbonHistory");
 
-// ✅ Import User model
-const User = require("../models/user");
+
+
+
 
 // Register route
 router.post("/register", async (req, res) => {
@@ -72,7 +77,7 @@ router.post("/login", async (req, res) => {
 // Get user data by email (for profile)
 router.get("/profile", async (req, res) => {
   const email = req.query.email;
-  
+
   if (!email) {
     return res.status(400).json({ message: "Email query parameter is required" });
   }
@@ -123,16 +128,27 @@ router.delete("/profile", async (req, res) => {
   }
 
   try {
+    // Delete the user
     const deletedUser = await User.findOneAndDelete({ email });
     if (!deletedUser) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    res.status(200).json({ message: "Account deleted successfully" });
+    // Delete all related data
+    await Promise.all([
+      Favorite.deleteMany({ email }),
+      Itinerary.deleteMany({ userEmail: email }),
+      carbonHistory.deleteMany({ email }),
+
+    ]);
+
+    res.status(200).json({ message: "Account and related data deleted successfully." });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error("Error deleting user and related data:", err);
+    res.status(500).json({ message: "Failed to delete account and related data." });
   }
 });
+
 
 
 // Update password route

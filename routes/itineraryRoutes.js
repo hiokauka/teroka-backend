@@ -81,4 +81,45 @@ router.get('/all', async (req, res) => {
   }
 });
 
+// Remove place from itinerary
+router.put('/remove-place', async (req, res) => {
+  const { userEmail, dayNumber, placeName } = req.body;
+
+  if (!userEmail || dayNumber === undefined || !placeName) {
+    return res.status(400).json({ message: 'Missing required fields' });
+  }
+
+  try {
+    const itinerary = await Itinerary.findOne({ userEmail });
+
+    if (!itinerary) {
+      return res.status(404).json({ message: 'Itinerary not found' });
+    }
+
+    // Find the day
+    const day = itinerary.days.find(d => d.day === dayNumber);
+    if (!day) {
+      return res.status(404).json({ message: `Day ${dayNumber} not found` });
+    }
+
+    // Filter out the place to remove
+    const initialLength = day.places.length;
+    day.places = day.places.filter(p => p.name !== placeName);
+
+    if (day.places.length === initialLength) {
+      // No place was removed
+      return res.status(404).json({ message: `Place "${placeName}" not found on day ${dayNumber}` });
+    }
+
+    // Save updated itinerary
+    await itinerary.save();
+
+    res.status(200).json({ message: `Place "${placeName}" removed from day ${dayNumber}` });
+
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+
 module.exports = router;
