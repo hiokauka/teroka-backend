@@ -4,7 +4,7 @@ const upload = require('../middlewares/upload'); // if you use multer for image 
 const { createPost, getAllPosts } = require('../controllers/postController');
 
 // Create Post (with image upload)
-router.post('/', upload.single('image'), createPost);
+router.post('/', createPost);
 
 // Get All Posts
 router.get('/', getAllPosts);

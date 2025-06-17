@@ -2,10 +2,9 @@ const Post = require('../models/post');
 const User = require('../models/user');
 const { v4: uuidv4 } = require('uuid');
 
-// Create Post with Email Verification
 const createPost = async (req, res) => {
     try {
-        const { email, post } = req.body;
+        const { email, post, imageUrl } = req.body; // Get imageUrl from body now
 
         // Validate required fields
         if (!email || !post) {
@@ -18,15 +17,12 @@ const createPost = async (req, res) => {
             return res.status(404).json({ message: 'User not found. Please use a registered email.' });
         }
 
-        // Handle image upload URL
-        const imageUrl = req.file ? `${req.protocol}://${req.get('host')}/${req.file.path}` : null;
-
         // Create new post
         const newPost = new Post({
             postid: uuidv4(),
             email,
             post,
-            imageUrl
+            imageUrl: imageUrl || null // Store Cloudinary URL or null
         });
 
         await newPost.save();
