@@ -21,6 +21,9 @@ const userRoutes = require("./routes/userRoutes");
 const favouriteRoutes = require('./routes/favouriteRoutes');
 const carbonHistoryRoutes = require('./routes/carbonHistoryRoutes'); 
 const itineraryRoutes = require('./routes/itineraryRoutes');
+const postRoutes = require('./routes/postRoutes'); 
+
+app.use('/uploads', express.static('uploads')); 
 
 // Use Routes
 app.use("/users", userRoutes);
@@ -30,6 +33,7 @@ app.use('/places', placesRoutes);
 app.use('/favorites', favouriteRoutes);
 app.use('/carbonhistory', carbonHistoryRoutes);
 app.use('/itineraries', itineraryRoutes);
+app.use('/posts', postRoutes)
 
 // Default route
 app.get('/', (req, res) => {
