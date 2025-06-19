@@ -6,7 +6,6 @@ const mongoose = require("mongoose");
 // MongoDB Atlas URI from .env
 const uri = process.env.MONGO_URI
 
-
 const app = express();
 
 // Middleware
@@ -22,6 +21,7 @@ const favouriteRoutes = require('./routes/favouriteRoutes');
 const carbonHistoryRoutes = require('./routes/carbonHistoryRoutes'); 
 const itineraryRoutes = require('./routes/itineraryRoutes');
 const postRoutes = require('./routes/postRoutes'); 
+const authRoutes = require('./routes/authRoutes');
 
 app.use('/uploads', express.static('uploads')); 
 
@@ -34,6 +34,7 @@ app.use('/favorites', favouriteRoutes);
 app.use('/carbonhistory', carbonHistoryRoutes);
 app.use('/itineraries', itineraryRoutes);
 app.use('/posts', postRoutes)
+app.use('/auth', authRoutes);
 
 // Default route
 app.get('/', (req, res) => {

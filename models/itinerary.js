@@ -4,6 +4,7 @@ const { v4: uuidv4 } = require('uuid');
 const PlaceSchema = new mongoose.Schema({
   name: { type: String, required: true },
   tags: [String],
+  carbon: { type: Number, required: true } // 👉 Add this line
 });
 
 const DaySchema = new mongoose.Schema({
